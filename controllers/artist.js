@@ -1,4 +1,4 @@
-var Song = require("../models/song");
+var Artist = require("../models/artist");
 
 const { param, body, validationResult } = require("express-validator");
 
@@ -21,43 +21,34 @@ exports.create = [
         .isAlpha("en-US", { ignore: " " })
         .withMessage("Name has non-alphanumeric characters."),
 
-    body("duration")
+    body("genre")
         .trim()
         .isLength({ min: 1 })
         .escape()
-        .withMessage("Duration must be specified.")
-        .isNumeric()
-        .withMessage("Duration must be a number."),
-
-    body("artist")
-        .trim()
-        .isLength({ min: 0 })
-        .escape()
-        .withMessage("Artist must be specified.")
-        .isNumeric()
-        .withMessage("Artist must be a number."),
+        .withMessage("Genre must be specified."),
 
     // Process Request
     (req, res, next) => {
         // Extract the validation errors from a request.
         const errors = validationResult(req);
 
-        // Create song object with escaped and trimmed data
-        var song = new Song({
+        // Create artist object with escaped and trimmed data
+        var artist = new Artist({
             _id: req.body.id,
             name: req.body.name,
-            duration: req.body.duration,
-            artist: req.body.artist,
+            genre: req.body.genre,
+            description: req.body.description,
+            image: req.body.image
         });
 
         if (!errors.isEmpty()) {
             return res.status(400).json({ errors: errors.array() });
         } else {
-            song.save(function (err) {
+            artist.save(function (err) {
                 if (err) {
-                    return res.status(500).json("Error saving song to artist");
+                    return res.status(500).json(err);
                 }
-                return res.status(201).json("Song created successfully !");
+                return res.status(201).json("Artist created successfully !");
             });
         }
     },
@@ -65,12 +56,12 @@ exports.create = [
 
 // Read
 exports.getAll = function (req, res, next) {
-  Song.find().populate("artist").exec(function (err, result) {
-    if (err) {
-      return res.status(500).json(err);
-    }
-    return res.status(200).json(result);
-  });
+    Artist.find().exec(function (err, result) {
+        if (err) {
+            return res.status(500).json(err);
+        }
+        return res.status(200).json(result);
+    });
 };
 
 exports.getById = [
@@ -89,7 +80,7 @@ exports.getById = [
         if (!errors.isEmpty()) {
             return res.status(400).json({ errors: errors.array() });
         } else {
-            Song.findById(req.params.id).populate("artist").exec(function (err, result) {
+            Artist.findById(req.params.id).exec(function (err, result) {
                 if (err) {
                     return res.status(500).json(err);
                 }
@@ -116,11 +107,11 @@ exports.delete = [
         if (!errors.isEmpty()) {
             return res.status(400).json({ errors: errors.array() });
         } else {
-            Song.findByIdAndRemove(req.params.id).exec(function (err, result) {
+            Artist.findByIdAndRemove(req.params.id).exec(function (err, result) {
                 if (err) {
                     return res.status(500).json(err);
                 }
-                return res.status(200).json("Song deleted successfully !");
+                return res.status(200).json("Artist deleted successfully !");
             });
         }
     },
@@ -144,41 +135,33 @@ exports.update = [
         .isAlpha("en-US", { ignore: " " })
         .withMessage("Name has non-alphanumeric characters."),
 
-    body("duration")
+    body("genre")
         .trim()
         .isLength({ min: 1 })
         .escape()
-        .withMessage("Duration must be specified.")
-        .isNumeric()
-        .withMessage("Duration must be a number."),
-        
-    body("artist")
-        .trim()
-        .isLength({ min: 1 })
-        .escape()
-        .withMessage("Artist must be specified.")
-        .isNumeric()
-        .withMessage("Artist must be a number."),
+        .withMessage("Genre must be specified."),
 
     (req, res, next) => {
         // Extract the validation errors from a request.
         const errors = validationResult(req);
 
-        // Create song object with escaped and trimmed data
-        var song = new Song({
-            _id: req.body.id,
+        // Create artist object with escaped and trimmed data
+        var artist = new Artist({
+            _id: req.params.id,
             name: req.body.name,
-            duration: req.body.duration
+            genre: req.body.genre,
+            description: req.body.description,
+            image: req.body.image
         });
 
         if (!errors.isEmpty()) {
             return res.status(400).json({ errors: errors.array() });
         } else {
-            Song.findByIdAndUpdate(req.params.id, song, function (err, result) {
+            Artist.findByIdAndUpdate(req.params.id, artist, function (err, result) {
                 if (err) {
-                return res.status(500).json(err);
+                    return res.status(500).json(err);
                 }
-                return res.status(201).json("Song updated successfully !");
+                return res.status(201).json("Artist updated successfully !");
             });
         }
     },
